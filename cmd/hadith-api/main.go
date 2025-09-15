@@ -91,7 +91,7 @@ func main() {
             })
         } else {
             // Search without cap to allow pagination afterwards.
-            hits = search.SimpleSearch(corpus, q, 0)
+            hits = search.Search(corpus, q, 0)
         }
 
         if useOffset {
