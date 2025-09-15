@@ -1,0 +1,145 @@
+openapi: 3.0.3
+info:
+  title: hadith-go REST API
+  version: 1.0.0
+  description: |
+    Minimal API to browse and search hadith collections.
+    - Browse by book (empty `q` + `book`)
+    - Search across Indonesian (`id`), Arabic (`arab`), and book name
+    - Pagination modes: offset/limit, page/page_size, or legacy limit
+servers:
+  - url: http://localhost:8080
+paths:
+  /healthz:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: ok
+  /books:
+    get:
+      summary: List available books
+      responses:
+        '200':
+          description: Book names
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /count:
+    get:
+      summary: Total hadith count across all books
+      responses:
+        '200':
+          description: Total count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                required: [count]
+  /search:
+    get:
+      summary: Search or browse hadith
+      description: |
+        - When `q` is non-empty, performs case-insensitive substring search.
+        - When `q` is empty and `book` is set, returns all entries in that book (browse mode).
+        - Pagination precedence: offset/limit > page/page_size > legacy limit.
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+          description: Query string. Empty with `book` set enables browse mode.
+        - in: query
+          name: book
+          schema: { type: string }
+          description: Exact book name (filename without .json)
+        - in: query
+          name: offset
+          schema: { type: integer, minimum: 0 }
+          description: Result offset (enables offset/limit mode when present)
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 200 }
+          description: Page size for offset/limit or legacy mode (default 50, max 200)
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+          description: 1-based page index (used when offset is not provided)
+        - in: query
+          name: page_size
+          schema: { type: integer, minimum: 1, maximum: 200 }
+          description: Page size for page-based pagination (default 50, max 200)
+      responses:
+        '200':
+          description: Array of results
+          headers:
+            X-Total-Count:
+              schema: { type: integer }
+              description: Total number of matching/browsable items
+            X-Offset:
+              schema: { type: integer }
+              description: Present in offset/limit mode
+            X-Limit:
+              schema: { type: integer }
+              description: Present in offset/limit mode
+            X-Page:
+              schema: { type: integer }
+              description: Present in page-based mode
+            X-Page-Size:
+              schema: { type: integer }
+              description: Present in page-based mode
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchResult'
+  /hadith/{book}/{number}:
+    get:
+      summary: Get a specific hadith by book and number
+      parameters:
+        - in: path
+          name: book
+          required: true
+          schema: { type: string }
+        - in: path
+          name: number
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '200':
+          description: Hadith
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hadith'
+        '404':
+          description: Not found
+components:
+  schemas:
+    Hadith:
+      type: object
+      properties:
+        book: { type: string }
+        number: { type: integer }
+        arab: { type: string, description: Arabic text }
+        id: { type: string, description: Indonesian translation }
+      required: [book, number, arab, id]
+    SearchResult:
+      type: object
+      properties:
+        hadith:
+          $ref: '#/components/schemas/Hadith'
+        score:
+          type: integer
+          description: Heuristic score (omitted or zero in browse mode)

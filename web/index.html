@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hadith Browser</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="app-bar">
+      <div class="container">
+        <h1 class="app-title">Hadith Browser</h1>
+        <div class="meta">
+          <span id="books-count">–</span> books • <span id="hadith-count">–</span> hadith
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="controls">
+        <form id="search-form">
+          <div class="row">
+            <input id="q" class="input" type="search" placeholder="Search Indonesian, Arabic, or book name…" autocomplete="off" />
+            <select id="book" class="select">
+              <option value="">All books</option>
+            </select>
+            <select id="limit" class="select">
+              <option value="20">20</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+            </select>
+            <button class="btn" type="submit">Search</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="results">
+        <div class="results-header">
+          <div id="results-summary">Type to search…</div>
+          <div class="pager">
+            <button id="prev" class="btn" disabled>Prev</button>
+            <button id="next" class="btn" disabled>Next</button>
+          </div>
+        </div>
+        <ol id="list" class="list"></ol>
+      </section>
+    </main>
+
+    <footer class="container footer">
+      <div>
+        Tip: Use the book filter to narrow results, and increase the limit for broader searches.
+      </div>
+    </footer>
+
+    <script src="/app.js" defer></script>
+  </body>
+  </html>

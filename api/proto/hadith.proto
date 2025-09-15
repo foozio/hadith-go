@@ -1,0 +1,26 @@
+syntax = "proto3";
+package hadith.v1;
+option go_package = "github.com/nuzlilatief/hadith-go/api/gen/go/hadithpb;hadithpb";
+
+message Hadith {
+  string book = 1;
+  int32 number = 2;
+  string arab = 3;
+  string id = 4; // Indonesian translation
+}
+
+message ListBooksRequest {}
+message ListBooksResponse { repeated string books = 1; }
+
+message GetHadithRequest { string book = 1; int32 number = 2; }
+message GetHadithResponse { Hadith hadith = 1; }
+
+message SearchRequest { string query = 1; int32 limit = 2; }
+message SearchResponse { repeated Hadith results = 1; }
+
+service HadithService {
+  rpc ListBooks(ListBooksRequest) returns (ListBooksResponse);
+  rpc GetHadith(GetHadithRequest) returns (GetHadithResponse);
+  rpc Search(SearchRequest) returns (SearchResponse);
+}
+

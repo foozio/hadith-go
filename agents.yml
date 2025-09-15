@@ -1,0 +1,71 @@
+name: hadith-go-maintainer
+description: >-
+  Assistant for maintaining the hadith-go project. Knows the repo layout,
+  how to run CLI/TUI/API, how to (optionally) enable gRPC, and follows a
+  concise code review checklist to propose focused fixes.
+
+repo:
+  root: .
+  books_dir: books
+  go_module: github.com/nuzlilatief/hadith-go
+  structure:
+    - cmd/hadith-cli: CLI for listing, searching, and fetching hadith
+    - cmd/hadith-tui: Minimal TUI with query + paginated results
+    - cmd/hadith-api: REST API (GET /books, /count, /search?q, /hadith/{book}/{number})
+    - cmd/hadith-grpc: gRPC server (build with tag 'grpc' after proto generation)
+    - internal/data: JSON loader and in-memory store
+    - internal/search: Simple case-insensitive substring search
+    - api/proto: Proto definitions for gRPC
+
+run:
+  - desc: Run CLI
+    cmd: go run ./cmd/hadith-cli books
+  - desc: Search via CLI
+    cmd: go run ./cmd/hadith-cli search niat --limit 5
+  - desc: Run TUI
+    cmd: go run ./cmd/hadith-tui
+  - desc: Run REST API on :8080
+    cmd: ADDR=:8080 go run ./cmd/hadith-api
+  - desc: Query API search endpoint
+    cmd: curl 'http://localhost:8080/search?q=niat&limit=3'
+
+grpc:
+  note: >-
+    gRPC is scaffolded but disabled by default to avoid toolchain deps.
+    Generate code with protoc, then build with tag 'grpc'.
+  steps:
+    - Ensure protoc is installed (>= 3.20)
+    - Install plugins: 'go install google.golang.org/protobuf/cmd/protoc-gen-go@latest'
+        and 'go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest'
+    - Run 'make proto'
+    - Build server: 'make grpc'
+
+code_review_checklist:
+  - Loader: robust JSON decoding, no panics on bad input
+  - Search: case-insensitive, consistent ordering, limit handling
+  - CLI: clear usage, helpful errors, stable output for piping
+  - TUI: non-blocking flow, instructions shown, pagination works
+  - API: proper status codes, JSON content-type, CORS headers
+  - gRPC: proto matches data model; build tag isolation respected
+  - Concurrency: read-only after load; consider RWMutex where needed
+  - Paths: books directory discovery from CWD works cross-platform
+  - Docs: update Makefile and agents.yml if interfaces change
+
+maintenance_tasks:
+  - id: improve-search
+    desc: Add regex and field filters (book:, arab:, id:)
+  - id: add-cache
+    desc: Build simple inverted index for faster search
+  - id: api-pagination
+    desc: Add 'page' and 'page_size' to /search
+  - id: grpc-auth
+    desc: Add optional API keys via interceptors and headers
+
+troubleshooting:
+  - symptom: API returns 404 for hadith
+    hint: Check book name matches filename (without .json) and number exists
+  - symptom: CLI cannot find books
+    hint: Run from repo root or ensure 'books' dir exists in a parent
+  - symptom: gRPC build fails
+    hint: Ensure 'make proto' ran and build with '-tags grpc'
+

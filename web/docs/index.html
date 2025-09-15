@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>API Docs — hadith-go</title>
+    <style>
+      html, body, #redoc { height: 100%; margin: 0; }
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+      .notice { padding: 12px; font-size: 14px; background:#fff3cd; border:1px solid #ffeeba; }
+    </style>
+    <script>
+      // Try local Redoc bundle first; fallback to CDN if not present
+      (function() {
+        function loadScript(src, cb){ var s=document.createElement('script'); s.src=src; s.onload=cb; s.onerror=cb; document.head.appendChild(s); }
+        var triedCdn = false;
+        loadScript('/docs/redoc.standalone.js', function(){
+          if (!window.Redoc && !triedCdn) {
+            triedCdn = true;
+            loadScript('https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js', render);
+          } else {
+            render();
+          }
+        });
+        function render(){
+          if (window.Redoc) { window.Redoc.init('/openapi.yaml', {}, document.getElementById('redoc')); }
+          else { document.getElementById('fallback').style.display='block'; }
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="fallback" class="notice" style="display:none">Failed to load Redoc. Check network or place a local copy at <code>web/docs/redoc.standalone.js</code>.</div>
+    <div id="redoc"></div>
+  </body>
+  </html>
+
