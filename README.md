@@ -1,7 +1,5 @@
 # hadith-go
 
-[![CI](https://github.com/nuzlilatief/hadith-go/actions/workflows/ci.yml/badge.svg)](https://github.com/nuzlilatief/hadith-go/actions/workflows/ci.yml)
-
 A fast, minimal Go project to browse and search hadith collections stored as JSON. It ships a CLI, a TUI, a REST API with a polished web UI, and optional gRPC.
 
 - Data: `books/*.json` arrays with `{ number, arab, id }`
