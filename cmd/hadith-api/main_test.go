@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/nuzlilatief/hadith-go/internal/cache"
 	"github.com/nuzlilatief/hadith-go/internal/data"
 	"github.com/nuzlilatief/hadith-go/internal/search"
 )
@@ -42,7 +43,8 @@ func setupTestStore(t *testing.T) (*data.Store, string) {
 
 func TestHealthzEndpoint(t *testing.T) {
 	store, root := setupTestStore(t)
-	mux := setupRouter(store, root)
+	searchCache := cache.NewFileCache(filepath.Join(root, ".cache"))
+	mux := setupRouter(store, root, searchCache)
 
 	req := httptest.NewRequest("GET", "/healthz", nil)
 	w := httptest.NewRecorder()
@@ -60,7 +62,8 @@ func TestHealthzEndpoint(t *testing.T) {
 
 func TestSearchFuzzy(t *testing.T) {
 	store, root := setupTestStore(t)
-	mux := setupRouter(store, root)
+	searchCache := cache.NewFileCache(filepath.Join(root, ".cache"))
+	mux := setupRouter(store, root, searchCache)
 
 	// Query with typo "muhammd" -> should match "muhammad" if fuzzy=true
 	req := httptest.NewRequest("GET", "/search?q=muhammd&fuzzy=true", nil)
@@ -88,7 +91,8 @@ func TestSearchFuzzy(t *testing.T) {
 
 func TestSearchNoFuzzy(t *testing.T) {
 	store, root := setupTestStore(t)
-	mux := setupRouter(store, root)
+	searchCache := cache.NewFileCache(filepath.Join(root, ".cache"))
+	mux := setupRouter(store, root, searchCache)
 
 	// Query with typo "muhammd" -> should NOT match if fuzzy is default (false)
 	req := httptest.NewRequest("GET", "/search?q=muhammd", nil)
@@ -105,70 +109,63 @@ func TestSearchNoFuzzy(t *testing.T) {
 		t.Fatalf("Failed to decode response: %v", err)
 	}
 
-		if len(results) != 0 {
+	if len(results) != 0 {
+		t.Errorf("Expected 0 results for exact search with typo, got %d", len(results))
+	}
+}
 
-			t.Errorf("Expected 0 results for exact search with typo, got %d", len(results))
+func TestGetBookAndHadith(t *testing.T) {
+	store, root := setupTestStore(t)
+	searchCache := cache.NewFileCache(filepath.Join(root, ".cache"))
+	mux := setupRouter(store, root, searchCache)
 
-		}
-
+	// Test /books
+	req := httptest.NewRequest("GET", "/books", nil)
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Errorf("GET /books: expected 200, got %d", w.Code)
 	}
 
-	
-
-	func TestGetBookAndHadith(t *testing.T) {
-
-		store, root := setupTestStore(t)
-
-		mux := setupRouter(store, root)
-
-	
-
-		// Test /books
-
-		req := httptest.NewRequest("GET", "/books", nil)
-
-		w := httptest.NewRecorder()
-
-		mux.ServeHTTP(w, req)
-
-		if w.Code != http.StatusOK {
-
-			t.Errorf("GET /books: expected 200, got %d", w.Code)
-
-		}
-
-	
-
-		// Test /hadith/test/1
-
-		req = httptest.NewRequest("GET", "/hadith/test/1", nil)
-
-		w = httptest.NewRecorder()
-
-		mux.ServeHTTP(w, req)
-
-		if w.Code != http.StatusOK {
-
-			t.Errorf("GET /hadith/test/1: expected 200, got %d", w.Code)
-
-		}
-
-		
-
-		// Test /hadith/test/999 (not found)
-
-		req = httptest.NewRequest("GET", "/hadith/test/999", nil)
-
-		w = httptest.NewRecorder()
-
-		mux.ServeHTTP(w, req)
-
-		if w.Code != http.StatusNotFound {
-
-			t.Errorf("GET /hadith/test/999: expected 404, got %d", w.Code)
-
-		}
-
+	// Test /hadith/test/1
+	req = httptest.NewRequest("GET", "/hadith/test/1", nil)
+	w = httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Errorf("GET /hadith/test/1: expected 200, got %d", w.Code)
 	}
 
-	
+	// Test /hadith/test/999 (not found)
+	req = httptest.NewRequest("GET", "/hadith/test/999", nil)
+	w = httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+	if w.Code != http.StatusNotFound {
+		t.Errorf("GET /hadith/test/999: expected 404, got %d", w.Code)
+	}
+}
+
+func TestSearchCaching(t *testing.T) {
+	store, root := setupTestStore(t)
+	searchCache := cache.NewFileCache(filepath.Join(root, ".cache"))
+	mux := setupRouter(store, root, searchCache)
+
+	q := "muhammad"
+	url := "/search?q=" + q
+
+	// First request - MISS
+	req := httptest.NewRequest("GET", url, nil)
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Header().Get("X-Cache") != "MISS" {
+		t.Errorf("Expected X-Cache: MISS, got %s", w.Header().Get("X-Cache"))
+	}
+
+	// Second request - HIT
+	w = httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Header().Get("X-Cache") != "HIT" {
+		t.Errorf("Expected X-Cache: HIT, got %s", w.Header().Get("X-Cache"))
+	}
+}

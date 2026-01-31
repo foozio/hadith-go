@@ -1,7 +1,10 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/nuzlilatief/hadith-go/internal/cache"
 	"github.com/nuzlilatief/hadith-go/internal/data"
 	"github.com/nuzlilatief/hadith-go/internal/search"
 )
@@ -22,14 +26,16 @@ func main() {
 		log.Fatalf("load books: %v", err)
 	}
 
-	handler := setupRouter(store, root)
+	searchCache := cache.NewFileCache(filepath.Join(root, ".hadith_cache"))
+
+	handler := setupRouter(store, root, searchCache)
 
 	addr := envOr("ADDR", ":8080")
 	log.Printf("hadith API listening on %s", addr)
 	log.Fatal(http.ListenAndServe(addr, handler))
 }
 
-func setupRouter(store *data.Store, root string) http.Handler {
+func setupRouter(store *data.Store, root string, searchCache *cache.FileCache) http.Handler {
 	mux := http.NewServeMux()
 	// Static web UI (if web/ directory exists at repo root)
 	staticDir := filepath.Join(root, "web")
@@ -112,11 +118,21 @@ func setupRouter(store *data.Store, root string) http.Handler {
 				return hits[i].Hadith.Number < hits[j].Hadith.Number
 			})
 		} else {
-			// Search without cap to allow pagination afterwards.
-			if useFuzzy {
-				hits = search.FuzzySearch(corpus, q, 0)
+			// Try cache
+			cacheKey := generateCacheKey(q, book, useFuzzy)
+			if cachedHits, ok := searchCache.Get(cacheKey); ok {
+				hits = cachedHits
+				w.Header().Set("X-Cache", "HIT")
 			} else {
-				hits = search.Search(corpus, q, 0)
+				// Search without cap to allow pagination afterwards.
+				if useFuzzy {
+					hits = search.FuzzySearch(corpus, q, 0)
+				} else {
+					hits = search.Search(corpus, q, 0)
+				}
+				w.Header().Set("X-Cache", "MISS")
+				// Save to cache (async could be better, but keep it simple for now)
+				_ = searchCache.Put(cacheKey, hits)
 			}
 		}
 
@@ -292,6 +308,12 @@ func envOr(k, def string) string {
 		return v
 	}
 	return def
+}
+
+func generateCacheKey(q, book string, fuzzy bool) string {
+	data := fmt.Sprintf("q=%s&book=%s&fuzzy=%v", q, book, fuzzy)
+	hash := sha256.Sum256([]byte(data))
+	return hex.EncodeToString(hash[:])
 }
 
 // findBooksRoot walks up from CWD to find a directory containing a "books" folder.
