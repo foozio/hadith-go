@@ -1,7 +1,7 @@
 # Implementation Plan: Persistent Caching and Fuzzy Matching
 
 ## Phase 1: Fuzzy Matching Implementation
-- [ ] Task: Research and select a Go fuzzy matching library or implement a basic Levenshtein algorithm.
+- [x] Task: Research and select a Go fuzzy matching library or implement a basic Levenshtein algorithm. [f93a178]
 - [ ] Task: Integrate fuzzy matching into the search logic.
     - [ ] Write tests for fuzzy search in `internal/search/search_test.go`.
     - [ ] Update `internal/search/search.go` to support fuzzy matching.
