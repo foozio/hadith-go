@@ -13,5 +13,5 @@
 - [x] Task: Implement the caching layer. [408c098]
     - [x] Write unit tests for the caching logic. [408c098]
     - [x] Implement cache write/read logic in a new package or within `internal/data`. [408c098]
-- [ ] Task: Integrate caching into the REST API.
+- [x] Task: Integrate caching into the REST API. [d3cf69d]
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Persistent Caching Layer' (Protocol in workflow.md)
