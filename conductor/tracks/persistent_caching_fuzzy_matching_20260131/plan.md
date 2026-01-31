@@ -8,10 +8,10 @@
 - [x] Task: Update CLI and API to expose fuzzy matching options. [6b3561f]
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Fuzzy Matching Implementation' (Protocol in workflow.md) [13fdc86]
 
-## Phase 2: Persistent Caching Layer
+## Phase 2: Persistent Caching Layer [checkpoint: 116a301]
 - [x] Task: Design the cache schema and selection of storage (e.g., local files or a simple KV store). [d36508f]
 - [x] Task: Implement the caching layer. [408c098]
     - [x] Write unit tests for the caching logic. [408c098]
     - [x] Implement cache write/read logic in a new package or within `internal/data`. [408c098]
 - [x] Task: Integrate caching into the REST API. [d3cf69d]
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Persistent Caching Layer' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Persistent Caching Layer' (Protocol in workflow.md) [116a301]
