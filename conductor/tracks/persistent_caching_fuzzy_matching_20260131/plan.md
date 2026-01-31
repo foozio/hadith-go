@@ -10,8 +10,8 @@
 
 ## Phase 2: Persistent Caching Layer
 - [x] Task: Design the cache schema and selection of storage (e.g., local files or a simple KV store). [d36508f]
-- [ ] Task: Implement the caching layer.
-    - [ ] Write unit tests for the caching logic.
-    - [ ] Implement cache write/read logic in a new package or within `internal/data`.
+- [x] Task: Implement the caching layer. [408c098]
+    - [x] Write unit tests for the caching logic. [408c098]
+    - [x] Implement cache write/read logic in a new package or within `internal/data`. [408c098]
 - [ ] Task: Integrate caching into the REST API.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Persistent Caching Layer' (Protocol in workflow.md)
