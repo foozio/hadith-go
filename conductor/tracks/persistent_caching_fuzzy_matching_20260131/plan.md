@@ -9,7 +9,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Fuzzy Matching Implementation' (Protocol in workflow.md) [13fdc86]
 
 ## Phase 2: Persistent Caching Layer
-- [ ] Task: Design the cache schema and selection of storage (e.g., local files or a simple KV store).
+- [x] Task: Design the cache schema and selection of storage (e.g., local files or a simple KV store). [d36508f]
 - [ ] Task: Implement the caching layer.
     - [ ] Write unit tests for the caching logic.
     - [ ] Implement cache write/read logic in a new package or within `internal/data`.
