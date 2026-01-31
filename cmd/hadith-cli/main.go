@@ -59,14 +59,19 @@ func main() {
 		enc := json.NewEncoder(os.Stdout)
 		enc.SetIndent("", "  ")
 		_ = enc.Encode(h)
-	case "search":
-		fs := flag.NewFlagSet("search", flag.ExitOnError)
-		limit := fs.Int("limit", 20, "max results")
-		_ = fs.Parse(os.Args[2:])
-		q := strings.Join(fs.Args(), " ")
-		results := search.SimpleSearch(store.All(), q, *limit)
-		for _, r := range results {
-			fmt.Printf("%s #%d [score %d]\n", r.Hadith.Book, r.Hadith.Number, r.Score)
+			case "search":
+			fs := flag.NewFlagSet("search", flag.ExitOnError)
+			limit := fs.Int("limit", 20, "max results")
+			fuzzy := fs.Bool("fuzzy", false, "enable fuzzy search")
+			_ = fs.Parse(os.Args[2:])
+			q := strings.Join(fs.Args(), " ")
+			var results []search.Result
+			if *fuzzy {
+				results = search.FuzzySearch(store.All(), q, *limit)
+			} else {
+				results = search.SimpleSearch(store.All(), q, *limit)
+			}
+			for _, r := range results {			fmt.Printf("%s #%d [score %d]\n", r.Hadith.Book, r.Hadith.Number, r.Score)
 			// print Indonesian translation first for readability
 			fmt.Printf("ID: %s\n", oneLine(r.Hadith.ID))
 			fmt.Printf("AR: %s\n\n", oneLine(r.Hadith.Arab))

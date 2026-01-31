@@ -21,6 +21,15 @@ func main() {
 	if err != nil {
 		log.Fatalf("load books: %v", err)
 	}
+
+	handler := setupRouter(store, root)
+
+	addr := envOr("ADDR", ":8080")
+	log.Printf("hadith API listening on %s", addr)
+	log.Fatal(http.ListenAndServe(addr, handler))
+}
+
+func setupRouter(store *data.Store, root string) http.Handler {
 	mux := http.NewServeMux()
 	// Static web UI (if web/ directory exists at repo root)
 	staticDir := filepath.Join(root, "web")
@@ -64,10 +73,12 @@ func main() {
 		pageStr := r.URL.Query().Get("page")
 		pageSizeStr := r.URL.Query().Get("page_size")
 		offsetStr := r.URL.Query().Get("offset")
+		fuzzyStr := r.URL.Query().Get("fuzzy")
 
 		// Choose mode precedence: offset/limit > page/page_size > legacy limit
 		useOffset := offsetStr != ""
 		usePagination := !useOffset && (pageStr != "" || pageSizeStr != "")
+		useFuzzy := fuzzyStr == "true" || fuzzyStr == "1"
 
 		// Defaults and caps
 		const defaultPageSize = 50
@@ -102,7 +113,11 @@ func main() {
 			})
 		} else {
 			// Search without cap to allow pagination afterwards.
-			hits = search.Search(corpus, q, 0)
+			if useFuzzy {
+				hits = search.FuzzySearch(corpus, q, 0)
+			} else {
+				hits = search.Search(corpus, q, 0)
+			}
 		}
 
 		if useOffset {
@@ -232,11 +247,7 @@ func main() {
 	})
 
 	// Apply middlewares
-	handler := loggingMiddleware(securityHeaders(cors(mux)))
-
-	addr := envOr("ADDR", ":8080")
-	log.Printf("hadith API listening on %s", addr)
-	log.Fatal(http.ListenAndServe(addr, handler))
+	return loggingMiddleware(securityHeaders(cors(mux)))
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
