@@ -1,3 +1,5 @@
+//go:build !grpc
+
 // This is a stub to guide users to enable gRPC build.
 package main
 
