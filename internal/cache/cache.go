@@ -1,12 +1,19 @@
 package cache
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"path/filepath"
 
 	"github.com/nuzlilatief/hadith-go/internal/search"
 )
+
+func cacheFileName(key string) string {
+	sum := sha256.Sum256([]byte(key))
+	return hex.EncodeToString(sum[:]) + ".json"
+}
 
 // FileCache implements a simple file-based cache for search results.
 type FileCache struct {
@@ -21,7 +28,7 @@ func NewFileCache(dir string) *FileCache {
 
 // Get retrieves results from the cache for a given key.
 func (c *FileCache) Get(key string) ([]search.Result, bool) {
-	path := filepath.Join(c.dir, key+".json")
+	path := filepath.Join(c.dir, cacheFileName(key))
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, false
@@ -37,7 +44,7 @@ func (c *FileCache) Get(key string) ([]search.Result, bool) {
 
 // Put stores results in the cache for a given key.
 func (c *FileCache) Put(key string, results []search.Result) error {
-	path := filepath.Join(c.dir, key+".json")
+	path := filepath.Join(c.dir, cacheFileName(key))
 	data, err := json.Marshal(results)
 	if err != nil {
 		return err

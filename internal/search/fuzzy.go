@@ -56,6 +56,9 @@ func FuzzySearch(all []data.Hadith, query string, limit int) []Result {
 		return nil
 	}
 	ql := strings.ToLower(q)
+	if len(ql) > 128 {
+		return nil
+	}
 	
 	// Threshold: allow 1 error for short words (len <= 4), 2 for longer.
 	threshold := 2

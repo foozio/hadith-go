@@ -1,6 +1,7 @@
 package search
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/nuzlilatief/hadith-go/internal/data"
@@ -99,5 +100,17 @@ func TestLevenshtein_EdgeCases(t *testing.T) {
 	}
 	if levenshtein("", "abc") != 3 {
 		t.Error("Distance from empty string should be length")
+	}
+}
+
+func TestFuzzySearch_RejectsLongQuery(t *testing.T) {
+	hadiths := []data.Hadith{
+		{Book: "test", Number: 1, Arab: "muhammad", ID: "prophet"},
+	}
+
+	longQuery := strings.Repeat("a", 129)
+	results := FuzzySearch(hadiths, longQuery, 10)
+	if results != nil && len(results) != 0 {
+		t.Fatalf("expected no results for long query, got %d", len(results))
 	}
 }

@@ -1,6 +1,8 @@
 package cache
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/nuzlilatief/hadith-go/internal/data"
@@ -42,5 +44,25 @@ func TestFileCache(t *testing.T) {
 	got2, ok2 := c2.Get(key)
 	if !ok2 || len(got2) != 1 {
 		t.Error("Cache should persist to disk")
+	}
+}
+
+func TestFileCache_RejectsPathTraversalKey(t *testing.T) {
+	tmpDir := t.TempDir()
+	c := NewFileCache(tmpDir)
+
+	results := []search.Result{
+		{Hadith: data.Hadith{Book: "test", Number: 1, Arab: "A", ID: "I"}, Score: 10},
+	}
+	key := "../evil"
+
+	if err := c.Put(key, results); err != nil {
+		t.Fatalf("Put failed: %v", err)
+	}
+
+	// Ensure we did not write outside the cache directory.
+	outsidePath := filepath.Join(tmpDir, "..", "evil.json")
+	if _, err := os.Stat(outsidePath); err == nil {
+		t.Fatalf("expected no file outside cache dir, found %s", outsidePath)
 	}
 }
