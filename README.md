@@ -26,6 +26,8 @@ go run ./cmd/hadith-cli count
 go run ./cmd/hadith-cli get bukhari 1
 
 go run ./cmd/hadith-cli search -limit 10 niat
+
+go run ./cmd/hadith-cli search -fuzzy -limit 5 muhammd
 ```
 
 - TUI
@@ -43,12 +45,14 @@ go run ./cmd/hadith-tui
   - Query params:
     - `q`: search string (optional). If empty and `book` is set, returns all entries in the book (browse mode).
     - `book`: exact book name (filename without `.json`). Optional filter; also enables browse mode when `q` is empty.
+    - `fuzzy`: set to `true` or `1` to enable fuzzy matching (typo tolerance).
     - Pagination (three compatible modes):
       - Offset/limit: `offset` (>=0), `limit` (>0, default 50, max 200). Precedence when `offset` is present.
       - Page-based: `page` (>=1), `page_size` (>0, default 50, max 200).
       - Legacy: `limit` only (applied after search when neither `offset` nor `page/page_size` is provided).
   - Response: JSON array of results, each like `{ hadith, score }` (score omitted in browse mode).
   - Headers (when paginated):
+    - Cache status: `X-Cache` (HIT/MISS)
     - Offset/limit: `X-Total-Count`, `X-Offset`, `X-Limit`
     - Page-based: `X-Total-Count`, `X-Page`, `X-Page-Size`
 

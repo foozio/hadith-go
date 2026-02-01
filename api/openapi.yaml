@@ -64,6 +64,10 @@ paths:
           schema: { type: string }
           description: Exact book name (filename without .json)
         - in: query
+          name: fuzzy
+          schema: { type: boolean }
+          description: Enable fuzzy matching for typo tolerance
+        - in: query
           name: offset
           schema: { type: integer, minimum: 0 }
           description: Result offset (enables offset/limit mode when present)
@@ -83,6 +87,9 @@ paths:
         '200':
           description: Array of results
           headers:
+            X-Cache:
+              schema: { type: string, enum: [HIT, MISS] }
+              description: Cache status for the query
             X-Total-Count:
               schema: { type: integer }
               description: Total number of matching/browsable items

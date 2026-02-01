@@ -19,7 +19,7 @@ func usage() {
 	fmt.Fprintf(os.Stderr, "  hadith-cli books\n")
 	fmt.Fprintf(os.Stderr, "  hadith-cli count\n")
 	fmt.Fprintf(os.Stderr, "  hadith-cli get <book> <number>\n")
-	fmt.Fprintf(os.Stderr, "  hadith-cli search [-limit N] <query>\n")
+	fmt.Fprintf(os.Stderr, "  hadith-cli search [-limit N] [-fuzzy] <query>\n")
 }
 
 func main() {
