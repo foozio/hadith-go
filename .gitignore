@@ -1,0 +1,18 @@
+# Binaries
+hadith-cli
+hadith-api
+hadith-tui
+hadith-grpc
+*.exe
+*.dll
+
+# Build artifacts
+dist/
+coverage.out
+
+# Cache
+.hadith_cache/
+
+# IDEs
+.vscode/
+.idea/

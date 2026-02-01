@@ -2,8 +2,9 @@ SHELL := /bin/bash
 ROOT := $(shell pwd)
 PROTO_DIR := api/proto
 GEN_DIR := api/gen/go
+DIST_DIR := dist
 
-.PHONY: run-cli run-tui run-api build all proto grpc
+.PHONY: run-cli run-tui run-api build all proto grpc release clean-dist
 
 run-cli:
 	go run ./cmd/hadith-cli --help || true
@@ -28,3 +29,19 @@ proto:
 grpc:
 	GOFLAGS="-tags=grpc" go build ./cmd/hadith-grpc
 
+clean-dist:
+	rm -rf $(DIST_DIR)
+
+release: clean-dist
+	mkdir -p $(DIST_DIR)
+	# Darwin ARM64
+	GOOS=darwin GOARCH=arm64 go build -o $(DIST_DIR)/hadith-cli-darwin-arm64 ./cmd/hadith-cli
+	GOOS=darwin GOARCH=arm64 go build -o $(DIST_DIR)/hadith-api-darwin-arm64 ./cmd/hadith-api
+	GOOS=darwin GOARCH=arm64 go build -o $(DIST_DIR)/hadith-tui-darwin-arm64 ./cmd/hadith-tui
+	# Linux AMD64
+	GOOS=linux GOARCH=amd64 go build -o $(DIST_DIR)/hadith-cli-linux-amd64 ./cmd/hadith-cli
+	GOOS=linux GOARCH=amd64 go build -o $(DIST_DIR)/hadith-api-linux-amd64 ./cmd/hadith-api
+	# Windows AMD64
+	GOOS=windows GOARCH=amd64 go build -o $(DIST_DIR)/hadith-cli-windows-amd64.exe ./cmd/hadith-cli
+	GOOS=windows GOARCH=amd64 go build -o $(DIST_DIR)/hadith-api-windows-amd64.exe ./cmd/hadith-api
+	@echo "Build complete. Artifacts in $(DIST_DIR)/"
