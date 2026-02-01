@@ -13,7 +13,8 @@ To provide a high-performance, accessible, and versatile platform for interactin
 - **Researchers:** Utilizing local Hadith data analysis tools.
 
 ## Core Features
-- **Fast Search:** Case-insensitive substring search with simple scoring.
+- **Advanced Search:** Includes fuzzy matching for typo tolerance and case-insensitive substring search.
+- **Performance Optimization:** Persistent caching for frequent search queries.
 - **Multiple Interfaces:** REST API, Web UI, CLI, TUI, and gRPC.
 - **In-Memory Storage:** Efficient data handling for performance.
 - **Comprehensive Collection:** Support for multiple major Hadith books in JSON format.

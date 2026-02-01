@@ -13,8 +13,8 @@
     - Protocol Buffers (v3) for gRPC.
 
 ## Storage & Search
-- **Storage:** In-memory data store using Go maps and slices, loaded from `books/*.json`.
-- **Search Engine:** Custom substring search logic with simple scoring implemented in `internal/search`.
+- **Storage:** In-memory data store using Go maps/slices, plus file-based JSON caching for search results in `.hadith_cache/`.
+- **Search Engine:** Custom substring search and Levenshtein distance fuzzy matching implemented in `internal/search`.
 
 ## Infrastructure & Tools
 - **Build System:** `Makefile` for managing builds, tests, and proto generation.
